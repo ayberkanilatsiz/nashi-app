@@ -7,10 +7,10 @@ enum WindowPlacementGlyph {
         let rect=NSRect(x:slot.midX-12,y:slot.midY-8,width:24,height:16)
         let outline=NSBezierPath(roundedRect:rect,xRadius:2,yRadius:2)
         color.setStroke();outline.lineWidth=1.3;outline.stroke()
-        let range=placement.horizontalRange
+        let range=placement.horizontalRange,vertical=placement.verticalRange
         color.withAlphaComponent(0.7).setFill()
-        NSBezierPath(rect:NSRect(x:rect.minX+2+(rect.width-4)*range.lowerBound,y:rect.minY+2,
-                                width:(rect.width-4)*(range.upperBound-range.lowerBound),height:rect.height-4)).fill()
+        NSBezierPath(rect:NSRect(x:rect.minX+2+(rect.width-4)*range.lowerBound,y:rect.maxY-2-(rect.height-4)*vertical.upperBound,
+                                width:(rect.width-4)*(range.upperBound-range.lowerBound),height:(rect.height-4)*(vertical.upperBound-vertical.lowerBound))).fill()
     }
 }
 
@@ -202,6 +202,24 @@ enum WindowPlacementGlyph {
         lastPlacement=placement
     }
 
+    /// A layout shortcut places the frontmost app's focused window without showing the wheel.
+    func arrangeFocusedWindow(_ placement:WindowPlacement) {
+        guard AXIsProcessTrusted() else {
+            onNotice?("Allow \(Self.permissionName) once to move and resize other apps’ windows.");return
+        }
+        guard let app=NSWorkspace.shared.frontmostApplication else { return }
+        let element=AXUIElementCreateApplication(app.processIdentifier);AXUIElementSetMessagingTimeout(element,0.2)
+        guard let focused=Self.attribute(element,kAXFocusedWindowAttribute),CFGetTypeID(focused)==AXUIElementGetTypeID() else { NSSound.beep();return }
+        let window=focused as! AXUIElement
+        guard Self.isUsable(window,pid:app.processIdentifier),let frame=Self.frame(of:window) else { NSSound.beep();return }
+        // Accessibility frames start at the top-left of the primary display; NSScreen frames at the bottom-left.
+        let top=NSScreen.screens.first?.frame.maxY ?? 0
+        let cocoa=CGRect(x:frame.minX,y:top-frame.maxY,width:frame.width,height:frame.height)
+        let screen=screen(at:NSPoint(x:cocoa.midX,y:cocoa.midY))
+        placementTask?.cancel()
+        placementTask=Task { [weak self] in await self?.apply(placement,to:window,pid:app.processIdentifier,on:screen) }
+    }
+
     private func cancel() { wheelPanel?.orderOut(nil);wheel?.selected=nil;preview?.orderOut(nil);lastPlacement=nil }
     private func screen(at point:NSPoint)->NSScreen { NSScreen.screens.first(where:{$0.frame.contains(point)}) ?? NSScreen.main ?? NSScreen.screens[0] }
 
@@ -219,9 +237,10 @@ enum WindowPlacementGlyph {
             let origin=Self.accessibilityPoint(NSPoint(x:wanted.minX,y:wanted.maxY))
             if abs(actual.width-wanted.width)<3,abs(actual.height-wanted.height)<3,
                abs(actual.minX-origin.x)<3,abs(actual.minY-origin.y)<3 {return}
-            if acknowledged,attempt>=1,actual.width>wanted.width+3,abs(actual.height-wanted.height)<3 {
-                // Respect an app's minimum width, while retaining the chosen
-                // left/center/right anchor instead of rejecting the placement.
+            if acknowledged,attempt>=1,(actual.width>wanted.width+3 && abs(actual.height-wanted.height)<3) ||
+                                        (actual.height>wanted.height+3 && abs(actual.width-wanted.width)<3) {
+                // Respect an app's minimum width or height, while retaining the chosen
+                // left/center/right or top/bottom anchor instead of rejecting the placement.
                 wanted=placement.frame(in:screen.visibleFrame,scale:screen.backingScaleFactor,minimumSize:actual.size)
             }
         }

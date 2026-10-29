@@ -2,14 +2,19 @@
 
 Nashi can arrange a window while its native title bar or resize border is being dragged. Tap **Shift or Command on macOS**, or **Shift or Alt on Windows**, move over a wheel slice and release the mouse. Releasing the modifier keeps the wheel open. Releasing over the center/outside the wheel leaves placement unchanged. **Escape** dismisses the wheel until the next gesture.
 
-The eight layouts are:
+The layouts are:
 
-| Width | Position |
-| --- | --- |
-| 1/3 | Left, middle, right |
-| 1/2 | Left, right |
-| 2/3 | Left, right |
-| 100% | Maximize |
+| Size | Position | macOS shortcut |
+| --- | --- | --- |
+| 1/3 width | Left, middle, right | ⌃⌥⌘←, ⌃⌥⌘↓, ⌃⌥⌘→ |
+| 1/2 width | Left, right | ⌥⌘←, ⌥⌘→ |
+| 1/2 height | Top, bottom | ⌥⌘↑, ⌥⌘↓ |
+| 2/3 width | Left, right | ⇧⌥⌘←, ⇧⌥⌘→ |
+| 100% | Maximize | ⌥⌘F |
+
+The top and bottom halves and the keyboard shortcuts are currently macOS only; Windows offers the other eight layouts on its wheel.
+
+On macOS, each layout also has a global keyboard shortcut that arranges the frontmost app's focused window without the wheel; the defaults are listed above. Because they are global, they take precedence over the same keys inside other apps (for example ⌥⌘←/→ browser tab switching). In **Settings → General → Window management**, press **Record** beside a layout and type a new combination to change it: it must include ⌘, ⌥ or ⌃ and cannot repeat another window shortcut or ⌃⇧D. **Delete** clears a layout's shortcut and **Escape** cancels recording. **Restore defaults** brings back the table above, and **Arrange the front window with keyboard shortcuts** turns them all off.
 
 **Maximize** fills the usable desktop without entering a separate full-screen space. You can drag the window again to choose another arrangement.
 

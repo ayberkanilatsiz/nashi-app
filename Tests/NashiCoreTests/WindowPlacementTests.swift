@@ -12,6 +12,10 @@ final class WindowPlacementTests: XCTestCase {
         XCTAssertEqual(right.width,1000);XCTAssertEqual(right.maxX,area.maxX)
         XCTAssertEqual(WindowPlacement.rightHalf.frame(in:area,minimumSize:minimum).maxX,area.maxX)
         XCTAssertEqual(WindowPlacement.leftThird.frame(in:area,minimumSize:CGSize(width:4000,height:200)),area)
+        let tall=CGSize(width:100,height:700)
+        let top=WindowPlacement.topHalf.frame(in:area,minimumSize:tall),bottom=WindowPlacement.bottomHalf.frame(in:area,minimumSize:tall)
+        XCTAssertEqual(top.height,700);XCTAssertEqual(top.maxY,area.maxY)
+        XCTAssertEqual(bottom.height,700);XCTAssertEqual(bottom.minY,area.minY)
     }
     func testMaximizeFillsTheExactUsableAreaAcrossDisplaysAndMinimumWidths() {
         for area in [CGRect(x:0,y:30,width:1511,height:910),
@@ -28,7 +32,7 @@ final class WindowPlacementTests: XCTestCase {
         XCTAssertEqual(WindowPlacement.maximize.frame(in:CGRect(x:0,y:0,width:100,height:CGFloat.infinity)),.zero)
     }
     func testRequestedPlacementsPartitionOddAndRetinaScreens() {
-        XCTAssertEqual(WindowPlacement.allCases.count, 8)
+        XCTAssertEqual(WindowPlacement.allCases.count, 10)
         for area in [CGRect(x:0,y:24,width:1511,height:910),
                      CGRect(x:-1920,y:-1030,width:1920,height:1006),
                      CGRect(x:1512,y:40,width:1727.5,height:1090)] {
@@ -44,7 +48,13 @@ final class WindowPlacementTests: XCTestCase {
                 XCTAssertEqual(WindowPlacement.rightTwoThirds.frame(in:area,scale:scale).minX,middle.minX)
                 XCTAssertEqual(WindowPlacement.leftHalf.frame(in:area,scale:scale).maxX,
                                WindowPlacement.rightHalf.frame(in:area,scale:scale).minX)
-                for placement in WindowPlacement.allCases {
+                let top=WindowPlacement.topHalf.frame(in:area,scale:scale)
+                let bottom=WindowPlacement.bottomHalf.frame(in:area,scale:scale)
+                XCTAssertEqual(top.maxY,area.maxY);XCTAssertEqual(bottom.minY,area.minY)
+                XCTAssertEqual(bottom.maxY,top.minY)
+                XCTAssertEqual(top.height+bottom.height,area.height,accuracy:0.5/scale)
+                for frame in [top,bottom] { XCTAssertEqual(frame.minX,area.minX);XCTAssertEqual(frame.width,area.width) }
+                for placement in WindowPlacement.allCases where placement.verticalRange == 0...1 {
                     let frame=placement.frame(in:area,scale:scale)
                     XCTAssertEqual(frame.minY,area.minY)
                     XCTAssertEqual(frame.height,area.height)
@@ -69,5 +79,44 @@ final class WindowPlacementTests: XCTestCase {
         XCTAssertFalse(intent.accepts(pointerDistance:80,frameChanged:true,freshFileDrag:false,requested:true))
         var next=WindowDragIntent()
         XCTAssertTrue(next.accepts(pointerDistance:80,frameChanged:true,freshFileDrag:false,requested:true))
+    }
+
+    func testEveryPlacementHasADistinctDefaultShortcutAndHotKeyID() {
+        XCTAssertEqual(Set(WindowPlacement.allCases.map(\.defaultShortcut)).count,WindowPlacement.allCases.count)
+        XCTAssertEqual(WindowPlacement.leftHalf.defaultShortcut.symbols,"⌥⌘←")
+        XCTAssertEqual(WindowPlacement.leftThird.defaultShortcut.symbols,"⌃⌥⌘←")
+        XCTAssertEqual(WindowPlacement.rightTwoThirds.defaultShortcut.symbols,"⌥⇧⌘→")
+        XCTAssertEqual(WindowPlacement.maximize.defaultShortcut.symbols,"⌥⌘F")
+        XCTAssertEqual(WindowPlacement.topHalf.defaultShortcut.symbols,"⌥⌘↑")
+        XCTAssertEqual(WindowPlacement.bottomHalf.defaultShortcut.symbols,"⌥⌘↓")
+        XCTAssertEqual(WindowPlacement.middleThird.defaultShortcut.symbols,"⌃⌥⌘↓")
+        for placement in WindowPlacement.allCases {
+            XCTAssertNotEqual(placement.hotKeyID,1)
+            XCTAssertEqual(WindowPlacement(hotKeyID:placement.hotKeyID),placement)
+        }
+        XCTAssertNil(WindowPlacement(hotKeyID:1))
+        XCTAssertNil(WindowPlacement(hotKeyID:10+UInt32(WindowPlacement.allCases.count)))
+    }
+    func testRecordedShortcutsPersistClearAndRejectConflicts() {
+        let defaults=UserDefaults(suiteName:"WindowShortcutTests-\(UUID().uuidString)")!
+        XCTAssertEqual(WindowShortcutPreferences.shortcut(for:.maximize,defaults:defaults)?.symbols,"⌥⌘F")
+        let combo=HotKeyCombo(keyCode:38,modifiers:[.control,.option],key:"j")
+        XCTAssertEqual(combo.symbols,"⌃⌥J")
+        XCTAssertEqual(WindowShortcutPreferences.set(combo,for:.leftThird,defaults:defaults),.saved)
+        XCTAssertEqual(WindowShortcutPreferences.shortcut(for:.leftThird,defaults:defaults),combo)
+        XCTAssertEqual(WindowShortcutPreferences.set(combo,for:.rightThird,defaults:defaults),.duplicate(WindowPlacement.leftThird.title))
+        XCTAssertEqual(WindowShortcutPreferences.set(WindowPlacement.leftHalf.defaultShortcut,for:.rightHalf,defaults:defaults),.duplicate(WindowPlacement.leftHalf.title))
+        XCTAssertEqual(WindowShortcutPreferences.set(HotKeyCombo.downloadLink,for:.maximize,defaults:defaults),.duplicate("Download Link…"))
+        XCTAssertEqual(WindowShortcutPreferences.set(HotKeyCombo(keyCode:38,modifiers:[.shift],key:"j"),for:.maximize,defaults:defaults),.invalid)
+        XCTAssertEqual(WindowShortcutPreferences.set(HotKeyCombo(keyCode:38,modifiers:[],key:"j"),for:.maximize,defaults:defaults),.invalid)
+        // A cleared shortcut frees its combination for another layout.
+        XCTAssertEqual(WindowShortcutPreferences.set(nil,for:.leftHalf,defaults:defaults),.saved)
+        XCTAssertNil(WindowShortcutPreferences.shortcut(for:.leftHalf,defaults:defaults))
+        XCTAssertEqual(WindowShortcutPreferences.set(WindowPlacement.leftHalf.defaultShortcut,for:.rightHalf,defaults:defaults),.saved)
+        XCTAssertEqual(AppLocalization.text("⌃⌥J is already used by Maximize.",language:"tr"),"⌃⌥J zaten Maximize için kullanılıyor.")
+        WindowShortcutPreferences.reset(defaults:defaults)
+        for placement in WindowPlacement.allCases {
+            XCTAssertEqual(WindowShortcutPreferences.shortcut(for:placement,defaults:defaults),placement.defaultShortcut)
+        }
     }
 }
