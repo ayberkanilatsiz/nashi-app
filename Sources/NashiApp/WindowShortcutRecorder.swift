@@ -52,10 +52,14 @@ struct WindowShortcutsEditor:View {
                         .frame(minWidth:80)
                 }
             }
-            HStack {
-                if let message { Text(message).font(.caption).foregroundStyle(.secondary) }
-                else { Text("Press Record, then type a combination with ⌘, ⌥ or ⌃. Delete clears it; Escape cancels.").font(.caption).foregroundStyle(.secondary) }
-                Spacer()
+            HStack(alignment:.top) {
+                // Wrap beside the button instead of truncating the longer Turkish/French copy.
+                Group {
+                    if let message { Text(message) }
+                    else { Text("Press Record, then type a combination with ⌘, ⌥ or ⌃. Delete clears it; Escape cancels.") }
+                }
+                .font(.caption).foregroundStyle(.secondary)
+                .fixedSize(horizontal:false,vertical:true).frame(maxWidth:.infinity,alignment:.leading)
                 Button("Restore defaults") { stop();WindowShortcutPreferences.reset();message=nil;revision+=1 }
             }
         }
