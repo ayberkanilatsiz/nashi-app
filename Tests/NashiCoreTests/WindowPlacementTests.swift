@@ -98,7 +98,9 @@ final class WindowPlacementTests: XCTestCase {
         XCTAssertNil(WindowPlacement(hotKeyID:10+UInt32(WindowPlacement.allCases.count)))
     }
     func testRecordedShortcutsPersistClearAndRejectConflicts() {
-        let defaults=UserDefaults(suiteName:"WindowShortcutTests-\(UUID().uuidString)")!
+        let suite="WindowShortcutTests-\(UUID().uuidString)"
+        let defaults=UserDefaults(suiteName:suite)!
+        addTeardownBlock { defaults.removePersistentDomain(forName:suite) }
         XCTAssertEqual(WindowShortcutPreferences.shortcut(for:.maximize,defaults:defaults)?.symbols,"⌥⌘F")
         let combo=HotKeyCombo(keyCode:38,modifiers:[.control,.option],key:"j")
         XCTAssertEqual(combo.symbols,"⌃⌥J")

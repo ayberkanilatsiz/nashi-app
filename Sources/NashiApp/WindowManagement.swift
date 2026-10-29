@@ -37,6 +37,8 @@ enum WindowPlacementGlyph {
     private var placementTask:Task<Void,Never>?
     private let fileWheelIsVisible:()->Bool
     var onNotice:((String)->Void)?
+    /// Called when macOS grants or revokes the window-control permission.
+    var onAccessibilityChange:(()->Void)?
 
     init(fileWheelIsVisible:@escaping()->Bool) {
         self.fileWheelIsVisible=fileWheelIsVisible
@@ -66,7 +68,10 @@ enum WindowPlacementGlyph {
                                                     now:ProcessInfo.processInfo.systemUptime)
         let point=NSEvent.mouseLocation
         let now=ProcessInfo.processInfo.systemUptime
-        if now>=nextAccessibilityCheck { accessibilityTrusted=AXIsProcessTrusted();nextAccessibilityCheck=now+1 }
+        if now>=nextAccessibilityCheck {
+            let trusted=AXIsProcessTrusted();nextAccessibilityCheck=now+1
+            if trusted != accessibilityTrusted { accessibilityTrusted=trusted;onAccessibilityChange?() }
+        }
         defer { wasDown=down }
         guard UserDefaults.standard.bool(forKey:"enabled"),
               UserDefaults.standard.bool(forKey:"windowManagementEnabled"),accessibilityTrusted else {
@@ -237,8 +242,9 @@ enum WindowPlacementGlyph {
             let origin=Self.accessibilityPoint(NSPoint(x:wanted.minX,y:wanted.maxY))
             if abs(actual.width-wanted.width)<3,abs(actual.height-wanted.height)<3,
                abs(actual.minX-origin.x)<3,abs(actual.minY-origin.y)<3 {return}
-            if acknowledged,attempt>=1,(actual.width>wanted.width+3 && abs(actual.height-wanted.height)<3) ||
-                                        (actual.height>wanted.height+3 && abs(actual.width-wanted.width)<3) {
+            let wider=actual.width>wanted.width+3,taller=actual.height>wanted.height+3
+            if acknowledged,attempt>=1,(wider && (taller || abs(actual.height-wanted.height)<3)) ||
+                                        (taller && abs(actual.width-wanted.width)<3) {
                 // Respect an app's minimum width or height, while retaining the chosen
                 // left/center/right or top/bottom anchor instead of rejecting the placement.
                 wanted=placement.frame(in:screen.visibleFrame,scale:screen.backingScaleFactor,minimumSize:actual.size)

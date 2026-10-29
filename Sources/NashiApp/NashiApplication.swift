@@ -183,6 +183,7 @@ enum NashiApplication {
         wheel=WheelController(state:state)
         monitor=DragMonitor(onEnd:{ [weak self] in self?.wheel.endDrag() }) { [weak self] urls,mode,point in self?.wheel.show(inputs:urls,mode:mode,at:point) }
         windowManagement=WindowManagementController(fileWheelIsVisible:{ [weak self] in self?.wheel.panel?.isVisible == true })
+        windowManagement.onAccessibilityChange = { [weak self] in self?.syncWindowShortcuts() }
         windowManagement.onNotice = { message in
             let alert=NSAlert();alert.messageText=L10n.text("Window arrangement");alert.informativeText=L10n.text(message)
             alert.addButton(withTitle:"OK");alert.runModal()
@@ -276,17 +277,19 @@ enum NashiApplication {
     /// and paused while Settings records a new combination.
     private func syncWindowShortcuts() {
         let defaults=UserDefaults.standard
-        let active=downloadHotKeyHandler != nil && !recordingWindowShortcut && defaults.bool(forKey:"enabled") &&
+        // Without window-control access the keys would be swallowed from other apps for nothing.
+        let active=downloadHotKeyHandler != nil && !recordingWindowShortcut && AXIsProcessTrusted() && defaults.bool(forKey:"enabled") &&
                    defaults.bool(forKey:"windowManagementEnabled") && defaults.bool(forKey:"windowShortcutsEnabled")
         var wanted:[WindowPlacement:HotKeyCombo]=[:]
         if active { for placement in WindowPlacement.allCases { wanted[placement]=WindowShortcutPreferences.shortcut(for:placement) } }
         guard wanted != registeredWindowShortcuts else { return }
         windowHotKeys.forEach { UnregisterEventHotKey($0) };windowHotKeys=[]
-        registeredWindowShortcuts=wanted
+        // Only successful registrations are remembered, so the next sync retries a refused one.
+        registeredWindowShortcuts=[:]
         for (placement,combo) in wanted {
             var ref:EventHotKeyRef?
             if RegisterEventHotKey(UInt32(combo.keyCode),combo.carbonModifiers,EventHotKeyID(signature:0x54474E44,id:placement.hotKeyID),
-                                   GetApplicationEventTarget(),0,&ref)==noErr,let ref { windowHotKeys.append(ref) }
+                                   GetApplicationEventTarget(),0,&ref)==noErr,let ref { windowHotKeys.append(ref);registeredWindowShortcuts[placement]=combo }
         }
     }
     func applicationWillTerminate(_ notification:Notification) {

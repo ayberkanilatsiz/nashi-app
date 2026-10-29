@@ -50,6 +50,7 @@ struct WindowShortcutsEditor:View {
                         .background(RoundedRectangle(cornerRadius:7).fill(recording==placement ? Color(nsColor:NashiPalette.gold).opacity(0.2):Color.secondary.opacity(0.12)))
                     Button(recording==placement ? "Cancel":"Record") { recording==placement ? stop():start(placement) }
                         .frame(minWidth:80)
+                        .accessibilityLabel(L10n.text(recording==placement ? "Cancel":"Record")+" "+L10n.text(placement.title))
                 }
             }
             HStack(alignment:.top) {
@@ -65,6 +66,8 @@ struct WindowShortcutsEditor:View {
         }
         .id(revision)
         .onDisappear(perform:stop)
+        .onReceive(NotificationCenter.default.publisher(for:NSWindow.willCloseNotification)) { _ in stop() }
+        .onReceive(NotificationCenter.default.publisher(for:NSApplication.didResignActiveNotification)) { _ in stop() }
     }
 
     private func label(for placement:WindowPlacement)->String {
