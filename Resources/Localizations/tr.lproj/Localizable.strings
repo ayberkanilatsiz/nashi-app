@@ -1001,6 +1001,7 @@
 "IMAGE SIZE" = "GÖRSEL BOYUTU";
 "IMAGES" = "GÖRSELLER";
 "IMAGES, VIDEOS, DOCUMENTS, AND ALL THE LITTLE THINGS IN BETWEEN." = "GÖRSELLER, VİDEOLAR, BELGELER VE DİĞER TÜM DOSYALARIN.";
+"INCLUDE CTRL, ALT OR WIN IN THE SHORTCUT." = "KISAYOLDA CTRL, ALT VEYA WİN BULUNMALI.";
 "INCLUDE ⌘, ⌥ OR ⌃ IN THE SHORTCUT." = "KISAYOLDA ⌘, ⌥ VEYA ⌃ BULUNMALI.";
 "INK COLOR" = "KALEM RENGİ";
 "INPUT AND OUTPUT FORMAT." = "GİRDİ VE ÇIKTI BİÇİMİ.";
@@ -1030,6 +1031,7 @@
 "Image size" = "Görsel boyutu";
 "Images" = "Görseller";
 "Images, videos, documents, and all the little things in between." = "Görseller, videolar, belgeler ve diğer tüm dosyaların.";
+"Include Ctrl, Alt or Win in the shortcut." = "Kısayolda Ctrl, Alt veya Win bulunmalı.";
 "Include ⌘, ⌥ or ⌃ in the shortcut." = "Kısayolda ⌘, ⌥ veya ⌃ bulunmalı.";
 "Ink color" = "Kalem rengi";
 "Input and output format." = "Girdi ve çıktı biçimi.";
@@ -1425,6 +1427,7 @@
 "PRESERVE METADATA" = "META VERİLERİ KORU";
 "PRESERVE ORIGINAL PAGES" = "ORİJİNAL SAYFALARI KORU";
 "PRESET" = "ÖN AYAR";
+"PRESS RECORD, THEN TYPE A COMBINATION WITH CTRL, ALT OR WIN. BACKSPACE CLEARS IT; ESCAPE CANCELS." = "KAYDET'E BAS, SONRA CTRL, ALT VEYA WİN İÇEREN BİR TUŞ BİRLEŞİMİ GİR. GERİ SİLME TUŞU KISAYOLU KALDIRIR; ESCAPE İPTAL EDER.";
 "PRESS RECORD, THEN TYPE A COMBINATION WITH ⌘, ⌥ OR ⌃. DELETE CLEARS IT; ESCAPE CANCELS." = "KAYDET'E BAS, SONRA ⌘, ⌥ VEYA ⌃ İÇEREN BİR TUŞ BİRLEŞİMİ GİR. SİL TUŞU KISAYOLU KALDIRIR; ESCAPE İPTAL EDER.";
 "PREVIEW" = "ÖNİZLEME";
 "PREVIEW LEFT" = "SOLU ÖNİZLE";
@@ -1486,6 +1489,7 @@
 "Preserve metadata" = "Meta verileri koru";
 "Preserve original pages" = "Orijinal sayfaları koru";
 "Preset" = "Ön ayar";
+"Press Record, then type a combination with Ctrl, Alt or Win. Backspace clears it; Escape cancels." = "Kaydet'e bas, sonra Ctrl, Alt veya Win içeren bir tuş birleşimi gir. Geri silme tuşu kısayolu kaldırır; Escape iptal eder.";
 "Press Record, then type a combination with ⌘, ⌥ or ⌃. Delete clears it; Escape cancels." = "Kaydet'e bas, sonra ⌘, ⌥ veya ⌃ içeren bir tuş birleşimi gir. Sil tuşu kısayolu kaldırır; Escape iptal eder.";
 "Preview" = "Önizleme";
 "Preview Left" = "Solu Önizle";

@@ -56,6 +56,8 @@
   "Bottom half": "Alt yarı",
   "1/3 left · middle · right   /   1/2 left · right · top · bottom   /   2/3 left · right": "1/3 sol · orta · sağ   /   1/2 sol · sağ · üst · alt   /   2/3 sol · sağ",
   "Press Record, then type a combination with ⌘, ⌥ or ⌃. Delete clears it; Escape cancels.": "Kaydet'e bas, sonra ⌘, ⌥ veya ⌃ içeren bir tuş birleşimi gir. Sil tuşu kısayolu kaldırır; Escape iptal eder.",
+  "Include Ctrl, Alt or Win in the shortcut.": "Kısayolda Ctrl, Alt veya Win bulunmalı.",
+  "Press Record, then type a combination with Ctrl, Alt or Win. Backspace clears it; Escape cancels.": "Kaydet'e bas, sonra Ctrl, Alt veya Win içeren bir tuş birleşimi gir. Geri silme tuşu kısayolu kaldırır; Escape iptal eder.",
   "Left two-thirds": "Sol üçte iki",
   "Right two-thirds": "Sağ üçte iki",
   "Maximize": "Büyüt",

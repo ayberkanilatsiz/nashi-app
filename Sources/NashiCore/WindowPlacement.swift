@@ -67,6 +67,53 @@ public enum WindowPlacement: String, CaseIterable, Sendable, Codable {
         return CGRect(x: x, y: workArea.maxY-top-height, width: width, height: height)
     }
 
+    /// A window that cannot be resized keeps its size and sits at this layout's anchor.
+    public func frame(in workArea: CGRect, scale: CGFloat = 1, fixedSize: CGSize) -> CGRect {
+        let slot = frame(in: workArea, scale: scale)
+        guard slot != .zero else { return .zero }
+        let width = min(max(0, fixedSize.width), workArea.width), height = min(max(0, fixedSize.height), workArea.height)
+        let x = horizontalRange.lowerBound == 0 ? slot.minX : horizontalRange.upperBound == 1 ? slot.maxX-width : slot.midX-width/2
+        let y = verticalRange.upperBound == 1 && verticalRange.lowerBound > 0 ? slot.minY : slot.maxY-height
+        return CGRect(x: min(max(x, workArea.minX), workArea.maxX-width),
+                      y: min(max(y, workArea.minY), workArea.maxY-height), width: width, height: height)
+    }
+
+    /// The same layout against the opposite edge, for layouts that hug the left or right edge.
+    public var mirrored: WindowPlacement? {
+        switch self {
+        case .leftThird: return .rightThird
+        case .rightThird: return .leftThird
+        case .leftHalf: return .rightHalf
+        case .rightHalf: return .leftHalf
+        case .leftTwoThirds: return .rightTwoThirds
+        case .rightTwoThirds: return .leftTwoThirds
+        case .middleThird, .topHalf, .bottomHalf, .maximize: return nil
+        }
+    }
+
+    /// Repeating a left/right layout on a window that already fills it continues on the
+    /// neighbouring display, against its facing edge: right half → next display's left half,
+    /// and once more → that display's right half. Frames share one coordinate space.
+    public static func destination(for placement: WindowPlacement, window: CGRect, displays: [CGRect],
+                                   current: Int, scale: CGFloat = 1, resizable: Bool = true) -> (placement: WindowPlacement, display: Int) {
+        guard displays.indices.contains(current), let mirrored = placement.mirrored else { return (placement, current) }
+        let area = displays[current]
+        // Minimum or fixed sizes keep the anchor, so compare against the frame the app allowed.
+        let matches = { (expected: CGRect) in
+            abs(window.minX-expected.minX) < 4 && abs(window.maxX-expected.maxX) < 4 &&
+            abs(window.minY-expected.minY) < 4 && abs(window.maxY-expected.maxY) < 4
+        }
+        guard resizable ? matches(placement.frame(in: area, scale: scale, minimumSize: window.size))
+                        : matches(placement.frame(in: area, scale: scale, fixedSize: window.size)) else { return (placement, current) }
+        let rightward = placement.horizontalRange.upperBound == 1
+        let ahead = displays.indices.filter { $0 != current && (rightward ? displays[$0].midX > area.midX : displays[$0].midX < area.midX) }
+        // Prefer displays beside this one over ones that are only diagonally further along.
+        let beside = ahead.filter { displays[$0].minY < area.maxY && displays[$0].maxY > area.minY }
+        guard let next = (beside.isEmpty ? ahead : beside).min(by: { abs(displays[$0].midX-area.midX) < abs(displays[$1].midX-area.midX) })
+        else { return (placement, current) }
+        return (mirrored, next)
+    }
+
     /// Adjacent regions share the same rounded boundary even at odd display sizes. A larger
     /// minimum keeps the leading/centered/trailing anchor and never exceeds the work area.
     private static func span(origin: CGFloat, length: CGFloat, range: ClosedRange<Double>,

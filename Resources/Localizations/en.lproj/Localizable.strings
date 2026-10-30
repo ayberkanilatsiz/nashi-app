@@ -1001,6 +1001,7 @@
 "IMAGE SIZE" = "IMAGE SIZE";
 "IMAGES" = "IMAGES";
 "IMAGES, VIDEOS, DOCUMENTS, AND ALL THE LITTLE THINGS IN BETWEEN." = "IMAGES, VIDEOS, DOCUMENTS, AND ALL THE LITTLE THINGS IN BETWEEN.";
+"INCLUDE CTRL, ALT OR WIN IN THE SHORTCUT." = "INCLUDE CTRL, ALT OR WIN IN THE SHORTCUT.";
 "INCLUDE ⌘, ⌥ OR ⌃ IN THE SHORTCUT." = "INCLUDE ⌘, ⌥ OR ⌃ IN THE SHORTCUT.";
 "INK COLOR" = "INK COLOR";
 "INPUT AND OUTPUT FORMAT." = "INPUT AND OUTPUT FORMAT.";
@@ -1030,6 +1031,7 @@
 "Image size" = "Image size";
 "Images" = "Images";
 "Images, videos, documents, and all the little things in between." = "Images, videos, documents, and all the little things in between.";
+"Include Ctrl, Alt or Win in the shortcut." = "Include Ctrl, Alt or Win in the shortcut.";
 "Include ⌘, ⌥ or ⌃ in the shortcut." = "Include ⌘, ⌥ or ⌃ in the shortcut.";
 "Ink color" = "Ink color";
 "Input and output format." = "Input and output format.";
@@ -1425,6 +1427,7 @@
 "PRESERVE METADATA" = "PRESERVE METADATA";
 "PRESERVE ORIGINAL PAGES" = "PRESERVE ORIGINAL PAGES";
 "PRESET" = "PRESET";
+"PRESS RECORD, THEN TYPE A COMBINATION WITH CTRL, ALT OR WIN. BACKSPACE CLEARS IT; ESCAPE CANCELS." = "PRESS RECORD, THEN TYPE A COMBINATION WITH CTRL, ALT OR WIN. BACKSPACE CLEARS IT; ESCAPE CANCELS.";
 "PRESS RECORD, THEN TYPE A COMBINATION WITH ⌘, ⌥ OR ⌃. DELETE CLEARS IT; ESCAPE CANCELS." = "PRESS RECORD, THEN TYPE A COMBINATION WITH ⌘, ⌥ OR ⌃. DELETE CLEARS IT; ESCAPE CANCELS.";
 "PREVIEW" = "PREVIEW";
 "PREVIEW LEFT" = "PREVIEW LEFT";
@@ -1486,6 +1489,7 @@
 "Preserve metadata" = "Preserve metadata";
 "Preserve original pages" = "Preserve original pages";
 "Preset" = "Preset";
+"Press Record, then type a combination with Ctrl, Alt or Win. Backspace clears it; Escape cancels." = "Press Record, then type a combination with Ctrl, Alt or Win. Backspace clears it; Escape cancels.";
 "Press Record, then type a combination with ⌘, ⌥ or ⌃. Delete clears it; Escape cancels." = "Press Record, then type a combination with ⌘, ⌥ or ⌃. Delete clears it; Escape cancels.";
 "Preview" = "Preview";
 "Preview Left" = "Preview Left";

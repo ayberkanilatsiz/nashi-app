@@ -64,6 +64,43 @@ final class WindowPlacementTests: XCTestCase {
         }
     }
 
+    func testFixedSizeWindowsSitAtTheLayoutAnchor() {
+        let area=CGRect(x:0,y:30,width:1800,height:960),size=CGSize(width:400,height:300)
+        XCTAssertEqual(WindowPlacement.leftHalf.frame(in:area,fixedSize:size),CGRect(x:0,y:690,width:400,height:300))
+        XCTAssertEqual(WindowPlacement.rightHalf.frame(in:area,fixedSize:size),CGRect(x:1400,y:690,width:400,height:300))
+        XCTAssertEqual(WindowPlacement.middleThird.frame(in:area,fixedSize:size).midX,area.midX)
+        XCTAssertEqual(WindowPlacement.bottomHalf.frame(in:area,fixedSize:size),CGRect(x:0,y:30,width:400,height:300))
+        XCTAssertEqual(WindowPlacement.maximize.frame(in:area,fixedSize:CGSize(width:4000,height:4000)),area)
+    }
+    func testRepeatedLeftAndRightLayoutsHopToTheNeighbouringDisplay() {
+        // Laptop in the middle, a display on each side and one stacked above.
+        let left=CGRect(x:-1920,y:0,width:1920,height:1050),laptop=CGRect(x:0,y:0,width:1512,height:920)
+        let right=CGRect(x:1512,y:-100,width:2560,height:1400),above=CGRect(x:0,y:920,width:1512,height:900)
+        let displays=[laptop,right,left,above]
+        let rightHalf=WindowPlacement.rightHalf.frame(in:laptop)
+        // Not yet in place: arrange on the current display.
+        XCTAssertTrue(WindowPlacement.destination(for:.rightHalf,window:CGRect(x:10,y:10,width:500,height:400),displays:displays,current:0)==(.rightHalf,0))
+        // Right half again → the right display's left half, then that display's right half.
+        XCTAssertTrue(WindowPlacement.destination(for:.rightHalf,window:rightHalf,displays:displays,current:0)==(.leftHalf,1))
+        XCTAssertTrue(WindowPlacement.destination(for:.rightHalf,window:WindowPlacement.leftHalf.frame(in:right),displays:displays,current:1)==(.rightHalf,1))
+        // The rightmost display has nowhere further to go.
+        XCTAssertTrue(WindowPlacement.destination(for:.rightHalf,window:WindowPlacement.rightHalf.frame(in:right),displays:displays,current:1)==(.rightHalf,1))
+        XCTAssertTrue(WindowPlacement.destination(for:.leftThird,window:WindowPlacement.leftThird.frame(in:laptop),displays:displays,current:0)==(.rightThird,2))
+        XCTAssertTrue(WindowPlacement.destination(for:.leftTwoThirds,window:WindowPlacement.leftTwoThirds.frame(in:right),displays:displays,current:1)==(.rightTwoThirds,0))
+        // A minimum width keeps the hop working.
+        let wide=WindowPlacement.rightHalf.frame(in:laptop,minimumSize:CGSize(width:1000,height:0))
+        XCTAssertTrue(WindowPlacement.destination(for:.rightHalf,window:wide,displays:displays,current:0)==(.leftHalf,1))
+        // A fixed-size window counts as placed once it sits at the anchor.
+        let fixed=WindowPlacement.rightHalf.frame(in:laptop,fixedSize:CGSize(width:400,height:300))
+        XCTAssertTrue(WindowPlacement.destination(for:.rightHalf,window:fixed,displays:displays,current:0)==(.rightHalf,0))
+        XCTAssertTrue(WindowPlacement.destination(for:.rightHalf,window:fixed,displays:displays,current:0,resizable:false)==(.leftHalf,1))
+        // Centered and vertical layouts never leave the display.
+        for placement in [WindowPlacement.middleThird,.topHalf,.bottomHalf,.maximize] {
+            XCTAssertTrue(WindowPlacement.destination(for:placement,window:placement.frame(in:laptop),displays:displays,current:0)==(placement,0))
+        }
+        XCTAssertTrue(WindowPlacement.destination(for:.rightHalf,window:rightHalf,displays:[laptop],current:0)==(.rightHalf,0))
+    }
+
     func testContentDragsAndFreshFilePayloadNeverActivateWindowWheel() {
         var intent=WindowDragIntent()
         XCTAssertFalse(intent.accepts(pointerDistance:200,frameChanged:false,freshFileDrag:false,requested:true))

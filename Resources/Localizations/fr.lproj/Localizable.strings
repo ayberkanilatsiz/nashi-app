@@ -1001,6 +1001,7 @@
 "IMAGE SIZE" = "TAILLE DE L’IMAGE";
 "IMAGES" = "IMAGES";
 "IMAGES, VIDEOS, DOCUMENTS, AND ALL THE LITTLE THINGS IN BETWEEN." = "IMAGES, VIDÉOS, DOCUMENTS ET TOUS LES PETITS FORMATS ENTRE LES DEUX.";
+"INCLUDE CTRL, ALT OR WIN IN THE SHORTCUT." = "LE RACCOURCI DOIT INCLURE CTRL, ALT OU WIN.";
 "INCLUDE ⌘, ⌥ OR ⌃ IN THE SHORTCUT." = "LE RACCOURCI DOIT INCLURE ⌘, ⌥ OU ⌃.";
 "INK COLOR" = "COULEUR DE L’ENCRE";
 "INPUT AND OUTPUT FORMAT." = "FORMAT D’ENTRÉE ET DE SORTIE.";
@@ -1030,6 +1031,7 @@
 "Image size" = "Taille de l’image";
 "Images" = "Images";
 "Images, videos, documents, and all the little things in between." = "Images, vidéos, documents et tous les petits formats entre les deux.";
+"Include Ctrl, Alt or Win in the shortcut." = "Le raccourci doit inclure Ctrl, Alt ou Win.";
 "Include ⌘, ⌥ or ⌃ in the shortcut." = "Le raccourci doit inclure ⌘, ⌥ ou ⌃.";
 "Ink color" = "Couleur de l’encre";
 "Input and output format." = "Format d’entrée et de sortie.";
@@ -1425,6 +1427,7 @@
 "PRESERVE METADATA" = "CONSERVER LES MÉTADONNÉES";
 "PRESERVE ORIGINAL PAGES" = "CONSERVER LES PAGES D’ORIGINE";
 "PRESET" = "PRÉRÉGLAGE";
+"PRESS RECORD, THEN TYPE A COMBINATION WITH CTRL, ALT OR WIN. BACKSPACE CLEARS IT; ESCAPE CANCELS." = "CLIQUEZ SUR ENREGISTRER, PUIS TAPEZ UNE COMBINAISON AVEC CTRL, ALT OU WIN. RETOUR ARRIÈRE L’EFFACE ; ÉCHAP ANNULE.";
 "PRESS RECORD, THEN TYPE A COMBINATION WITH ⌘, ⌥ OR ⌃. DELETE CLEARS IT; ESCAPE CANCELS." = "CLIQUEZ SUR ENREGISTRER, PUIS TAPEZ UNE COMBINAISON AVEC ⌘, ⌥ OU ⌃. SUPPRIMER L’EFFACE ; ÉCHAP ANNULE.";
 "PREVIEW" = "APERÇU";
 "PREVIEW LEFT" = "APERÇU À GAUCHE";
@@ -1486,6 +1489,7 @@
 "Preserve metadata" = "Conserver les métadonnées";
 "Preserve original pages" = "Conserver les pages d’origine";
 "Preset" = "Préréglage";
+"Press Record, then type a combination with Ctrl, Alt or Win. Backspace clears it; Escape cancels." = "Cliquez sur Enregistrer, puis tapez une combinaison avec Ctrl, Alt ou Win. Retour arrière l’efface ; Échap annule.";
 "Press Record, then type a combination with ⌘, ⌥ or ⌃. Delete clears it; Escape cancels." = "Cliquez sur Enregistrer, puis tapez une combinaison avec ⌘, ⌥ ou ⌃. Supprimer l’efface ; Échap annule.";
 "Preview" = "Aperçu";
 "Preview Left" = "Aperçu à gauche";
