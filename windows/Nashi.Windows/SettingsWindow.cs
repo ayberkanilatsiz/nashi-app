@@ -27,9 +27,10 @@ public sealed partial class SettingsWindow:Window
         language.SelectionChanged+=(_,_)=>Save(store.Value with{Language=language.SelectedIndex==1?"tr":"en"});page.Children.Add(language);
     }
     /// Every layout row has a Record button that captures the next key combination.
-    private void RenderShortcuts()
+    private void RenderShortcuts(WindowPlacement? focus=null)
     {
-        shortcutPanel.Children.Clear();shortcutPanel.IsEnabled=appearanceStore?.WindowManagementEnabled!=false&&store.Value.WindowShortcutsEnabled;
+        // Rebuilt buttons would otherwise drop keyboard and screen reader focus from the row.
+        var refocus=shortcutPanel.IsKeyboardFocusWithin?focus:null;shortcutPanel.Children.Clear();shortcutPanel.IsEnabled=appearanceStore?.WindowManagementEnabled!=false&&store.Value.WindowShortcutsEnabled;
         var rows=new Grid();foreach(var width in new[]{GridLength.Auto,new GridLength(1,GridUnitType.Star),GridLength.Auto,GridLength.Auto})rows.ColumnDefinitions.Add(new ColumnDefinition{Width=width});
         foreach(var placement in Enum.GetValues<WindowPlacement>())
         {
@@ -39,7 +40,7 @@ public sealed partial class SettingsWindow:Window
             // Key names stay as typed; the placeholder copy follows the language picker.
             var shortcut=store.Value.Shortcut(placement);var text=new TextBlock{Text=active?"Type a shortcut…":shortcut?.Text??"None",FontWeight=FontWeights.SemiBold,TextAlignment=TextAlignment.Center};if(active||shortcut is null)L10n.Label(text);
             var combo=new Border{MinWidth=130,Margin=new(12,4,8,4),Padding=new(8,4,8,4),CornerRadius=new(7),Background=Theme.Brush(active?"Sand":"Inset"),Child=text};
-            var button=MainWindow.Button(active?"Cancel":"Record",()=>{if(recording==placement)StopRecording();else StartRecording(placement);});button.MinWidth=80;button.Margin=new(0,4,0,4);
+            var button=MainWindow.Button(active?"Cancel":"Record",()=>{if(recording==placement)StopRecording();else StartRecording(placement);});button.MinWidth=80;button.Margin=new(0,4,0,4);if(placement==refocus)_=Dispatcher.InvokeAsync(()=>button.Focus(),System.Windows.Threading.DispatcherPriority.Loaded);
             System.Windows.Automation.AutomationProperties.SetName(button,L10n.Text(active?"Cancel":"Record")+" "+L10n.Text(placement.Title()));
             foreach(var (element,column) in new (UIElement,int)[]{(glyph,0),(title,1),(combo,2),(button,3)}){Grid.SetRow(element,row);Grid.SetColumn(element,column);rows.Children.Add(element);}
         }
@@ -49,8 +50,8 @@ public sealed partial class SettingsWindow:Window
         var help=new TextBlock{Text=shortcutMessage??"Press Record, then type a combination with Ctrl, Alt or Win. Backspace clears it; Escape cancels.",TextWrapping=TextWrapping.Wrap,Margin=new(0,0,12,0),Foreground=Theme.Brush("Muted")};if(shortcutMessage is null)L10n.Label(help);footer.Children.Add(help);
         shortcutPanel.Children.Add(footer);
     }
-    private void StartRecording(WindowPlacement placement){recording=placement;shortcutMessage=null;WindowShortcutHost.Recording=true;RenderShortcuts();}
-    private void StopRecording(){if(recording is null)return;recording=null;WindowShortcutHost.Recording=false;RenderShortcuts();}
+    private void StartRecording(WindowPlacement placement){recording=placement;shortcutMessage=null;WindowShortcutHost.Recording=true;RenderShortcuts(placement);}
+    private void StopRecording(){if(recording is not {} placement)return;recording=null;WindowShortcutHost.Recording=false;RenderShortcuts(placement);}
     private void RecordShortcut(WindowPlacement placement,System.Windows.Input.KeyEventArgs e)
     {
         // Alt combinations arrive as a system key.
@@ -64,7 +65,7 @@ public sealed partial class SettingsWindow:Window
         var shortcut=new WindowShortcut(modifiers,code);var (value,conflict)=store.Value.WithShortcut(placement,shortcut);
         if(value is not null){Save(value);StopRecording();return;}
         shortcutMessage=conflict is null?L10n.Text("Include Ctrl, Alt or Win in the shortcut."):L10n.Text(shortcut.Text+" is already used by "+L10n.Text(conflict)+".");
-        System.Media.SystemSounds.Beep.Play();RenderShortcuts();
+        System.Media.SystemSounds.Beep.Play();RenderShortcuts(placement);
     }
     private void ShowSection(Func<Task> update)
     {

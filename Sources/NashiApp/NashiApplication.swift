@@ -119,6 +119,7 @@ enum NashiApplication {
     private var downloadHotKeyHandler:EventHandlerRef?
     private var windowHotKeys:[EventHotKeyRef]=[]
     private var registeredWindowShortcuts:[WindowPlacement:HotKeyCombo]=[:]
+    private var windowShortcutRetry:Timer?
     private var recordingWindowShortcut=false
     private let successToast=SuccessToastController()
     var welcome:NSWindow?
@@ -280,6 +281,7 @@ enum NashiApplication {
         // Without window-control access the keys would be swallowed from other apps for nothing.
         let active=downloadHotKeyHandler != nil && !recordingWindowShortcut && AXIsProcessTrusted() && defaults.bool(forKey:"enabled") &&
                    defaults.bool(forKey:"windowManagementEnabled") && defaults.bool(forKey:"windowShortcutsEnabled")
+        windowShortcutRetry?.invalidate();windowShortcutRetry=nil
         var wanted:[WindowPlacement:HotKeyCombo]=[:]
         if active { for placement in WindowPlacement.allCases { wanted[placement]=WindowShortcutPreferences.shortcut(for:placement) } }
         guard wanted != registeredWindowShortcuts else { return }
@@ -291,9 +293,14 @@ enum NashiApplication {
             if RegisterEventHotKey(UInt32(combo.keyCode),combo.carbonModifiers,EventHotKeyID(signature:0x54474E44,id:placement.hotKeyID),
                                    GetApplicationEventTarget(),0,&ref)==noErr,let ref { windowHotKeys.append(ref);registeredWindowShortcuts[placement]=combo }
         }
+        // A combination another app holds is retried until that app releases it.
+        if registeredWindowShortcuts.count<wanted.count {
+            windowShortcutRetry=Timer.scheduledTimer(withTimeInterval:5,repeats:false) { [weak self] _ in Task { @MainActor in self?.syncWindowShortcuts() } }
+        }
     }
     func applicationWillTerminate(_ notification:Notification) {
         windowManagement?.stop()
+        windowShortcutRetry?.invalidate()
         if let downloadHotKey { UnregisterEventHotKey(downloadHotKey) }
         windowHotKeys.forEach { UnregisterEventHotKey($0) }
         if let downloadHotKeyHandler { RemoveEventHandler(downloadHotKeyHandler) }
